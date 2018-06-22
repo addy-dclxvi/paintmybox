@@ -1,0 +1,457 @@
+#!/bin/bash
+
+checkup () {	
+	# Create paintmybox theme folder if doesn't exist
+	if [ ! -d "$HOME/.themes/paintmybox/" ]; then
+		mkdir ~/.themes/paintmybox/
+		mkdir ~/.themes/paintmybox/openbox-3/
+	fi
+	# Create tint2 folder if doesn't exist
+	if [ ! -d "$HOME/.config/tint2/" ]; then
+		mkdir ~/.config/tint2/
+	fi
+	# Create dunst folder if doesn't exist
+	if [ ! -d "$HOME/.config/dunst" ]; then
+		mkdir ~/.config/dunst/
+	fi
+	# Remove the previous cache
+	if [ -e ~/.cache/paintmyboxcache ]; then
+		rm ~/.cache/paintmyboxcache
+	fi
+	# Remove previous generated openbox theme
+	if [ -e ~/.themes/paintmybox/openbox-3/themerc ]; then
+		rm ~/.themes/paintmybox/openbox-3/themerc
+	fi
+	# Remove previous generated tint2 theme
+	if [ -e ~/.config/tint2/tint2rc ]; then
+		rm ~/.config/tint2/tint2rc
+	fi
+	# Remove previous generated dunst theme
+	if [ -e ~/.config/tint2/dunstrc ]; then
+		rm ~/.config/tint2/dunstrc
+	fi
+}
+
+colorpick () {
+	COLOR=$(shuf -n1 -e ~/.colors/*)
+	SHORTCOLOR=$(echo $COLOR | sed "s@.*/@@")
+	xrdb ~/.Xresources
+	xrdb -merge $COLOR
+}
+
+getcolors () {
+	FOREGROUND="$(xrdb -query | grep 'foreground:'| awk '{print $NF}')"
+	BACKGROUND="$(xrdb -query | grep 'background:'| awk '{print $NF}')"
+	CURSOR="$(xrdb -query | grep 'cursorColor:'| awk '{print $NF}')"
+	BLACK="$(xrdb -query | grep 'color0:'| awk '{print $NF}')"
+	RED="$(xrdb -query | grep 'color1:'| awk '{print $NF}')"
+	GREEN="$(xrdb -query | grep 'color2:'| awk '{print $NF}')"
+	YELLOW="$(xrdb -query | grep 'color3:'| awk '{print $NF}')"
+	BLUE="$(xrdb -query | grep 'color4:'| awk '{print $NF}')"
+	MAGENTA="$(xrdb -query | grep 'color5:'| awk '{print $NF}')"
+	CYAN="$(xrdb -query | grep 'color6:'| awk '{print $NF}')"
+	WHITE="$(xrdb -query | grep 'color7:'| awk '{print $NF}')"
+	ALTBLACK="$(xrdb -query | grep 'color8:'| awk '{print $NF}')"
+	ALTRED="$(xrdb -query | grep 'color9:'| awk '{print $NF}')"
+	ALTGREEN="$(xrdb -query | grep 'color10:'| awk '{print $NF}')"
+	ALTYELLOW="$(xrdb -query | grep 'color11:'| awk '{print $NF}')"
+	ALTBLUE="$(xrdb -query | grep 'color12:'| awk '{print $NF}')"
+	ALTMAGENTA="$(xrdb -query | grep 'color13:'| awk '{print $NF}')"
+	ALTCYAN="$(xrdb -query | grep 'color14:'| awk '{print $NF}')"
+	ALTWHITE="$(xrdb -query | grep 'color15:'| awk '{print $NF}')"
+}
+
+cachecolors () {
+	read -d '' paintmyboxcache <<- EOF
+	FOREGROUND=${FOREGROUND}
+	BACKGROUND="${BACKGROUND}"
+	CURSOR="${CURSOR}"
+	BLACK="${BLACK}"
+	RED="${RED}"
+	GREEN="${GREEN}"
+	YELLOW="${YELLOW}"
+	BLUE="${BLUE}"
+	MAGENTA="${MAGENTA}"
+	CYAN="${CYAN}"
+	WHITE="${WHITE}"
+	ALTBLACK="${BLACK}"
+	ALTRED="${RED}"
+	ALTGREEN="${GREEN}"
+	ALTYELLOW="${YELLOW}"
+	ALTBLUE="${BLUE}"
+	ALTMAGENTA="${MAGENTA}"
+	ALTCYAN="${CYAN}"
+	ALTWHITE="${WHITE}"
+	EOF
+}
+
+deploytheme () {
+	read -d '' themerc <<- EOF
+	!! Don't edit this file
+	!! This will be overwritten on script load
+	!! Edit the script instead if you want to modify the theme
+	
+	!! menu background
+	menu.items.bg: flat
+	menu.items.bg.color: ${BACKGROUND}
+	menu.overlap.x: -4
+
+	!! menu text
+	menu.items.text.color: ${FOREGROUND}
+	menu.items.justify: left
+	menu.items.disabled.text.color: ${BLACK}
+
+	!! menu separator
+	menu.separator.padding.height: 2
+	menu.separator.color: ${BACKGROUND}
+
+	!! menu border
+	menu.border.width: 4
+	menu.border.color: ${BACKGROUND}
+
+	!! menu headers
+	menu.title.bg: flat
+	menu.title.bg.color: ${BACKGROUND}
+	menu.title.text.color: ${WHITE}
+	menu.title.text.justify: center
+
+	!! selected menu item
+	menu.items.active.bg: flat
+	menu.items.active.bg.color: ${BLUE}
+	menu.items.active.text.color: ${BACKGROUND}
+
+	!! titlebar
+	window.active.title.bg: flat
+	window.active.title.bg.color: ${MAGENTA}
+	window.inactive.title.bg: flat
+	window.inactive.title.bg.color: ${CYAN}
+
+	!! titlebar text
+	window.label.text.justify: center
+	window.active.label.bg: parentrelative
+	window.active.label.text.color: ${FOREGROUND}
+	window.inactive.label.bg: parentrelative
+	window.inactive.label.text.color: ${BLACK}
+
+	!! window buttons
+	window.*.button.*.bg: parentrelative
+	window.active.button.*.hover.bg: flat
+	window.inactive.button.*.hover.bg: parentrelative
+	window.*.button.*.pressed.bg: flat
+
+	window.active.button.*.hover.bg.color: ${BLUE}
+	window.active.button.*.hover.image.color: ${BACKGROUND}
+	window.active.button.*.pressed.bg.color: ${BLUE}
+	window.inactive.button.*.pressed.bg.color: ${RED}
+
+	window.active.button.*.image.color: ${FOREGROUND}
+	window.active.button.disabled.image.color: ${BLACK}
+	window.inactive.button.*.image.color: ${BLACK}
+	window.inactive.button.disabled.image.color: ${BLACK}
+
+	!! borders
+	window.active.border.color: ${BACKGROUND}
+	window.inactive.border.color: ${BACKGROUND}
+	border.width: 0
+	padding.width: 4
+	padding.height: 8
+	window.handle.width: 4
+	window.client.padding.width: 0
+	window.client.padding.height: 0
+
+	window.active.client.color:  ${BACKGROUND}
+	window.inactive.client.color:  ${BACKGROUND}
+
+	window.active.handle.bg: flat
+	window.active.handle.bg.color: ${BACKGROUND}
+	window.inactive.handle.bg: flat
+	window.inactive.handle.bg.color: ${BACKGROUND}
+
+	window.active.grip.bg: flat
+	window.active.grip.bg.color: ${BACKGROUND}
+	window.inactive.grip.bg: flat
+	window.inactive.grip.bg.color: ${BACKGROUND}
+
+	!! on-screen displays
+	osd.border.width: 1
+	osd.border.color: ${BACKGROUND}
+	osd.label.text.color: ${FOREGROUND}
+	osd.bg: flat solid
+	osd.bg.color: ${BACKGROUND}
+	osd.label.bg: flat solid
+	osd.label.bg.color: ${BACKGROUND}
+	osd.hilight.bg: flat solid
+	osd.hilight.bg.color: ${BLUE}
+	osd.unhilight.bg: flat solid
+	osd.unhilight.bg.color: ${BLACK}
+	EOF
+}
+
+deploytint2 () {
+	read -d '' tint2rc <<- EOF
+	# Don't edit this file
+	# This will be overwritten on script load
+	# Edit the script instead if you want to modify the theme
+	
+	# background 1 / taskbar, panel, tray, tooltip
+	rounded = 0
+	border_width = 0
+	border_sides = 
+	background_color = ${BACKGROUND} 100
+	border_color = #000000 0
+	background_color_hover = #000000 0
+	border_color_hover = #000000 0
+	background_color_pressed = #000000 0
+	border_color_pressed = #000000 0
+
+	# background 2 / clock
+	rounded = 0
+	border_width = 0
+	border_sides = 
+	background_color = ${RED} 100
+	border_color = #000000 0
+	background_color_hover = #000000 0
+	border_color_hover = #000000 0
+	background_color_pressed = #000000 0
+	border_color_pressed = #000000 0
+
+	# background 3 / active task
+	rounded = 0
+	border_width = 1
+	border_sides = TBLR
+	background_color = #000000 0
+	border_color = ${FOREGROUND} 40
+	background_color_hover = #000000 0
+	border_color_hover = #000000 0
+	background_color_pressed = #000000 0
+	border_color_pressed = #000000 0
+
+	# background 4 / workspace
+	rounded = 0
+	border_width = 0
+	border_sides = 
+	background_color = ${MAGENTA} 100
+	border_color = #000000 0
+	background_color_hover = #000000 0
+	border_color_hover = #000000 0
+	background_color_pressed = #000000 0
+	border_color_pressed = #000000 0
+
+	# background 5 / urgent task
+	rounded = 0
+	border_width = 0
+	border_sides = 
+	background_color = ${YELLOW} 100
+	border_color = #000000 0
+	background_color_hover = #000000 0
+	border_color_hover = #000000 0
+	background_color_pressed = #000000 0
+	border_color_pressed = #000000 0
+
+	# panel
+	panel_items = TSC
+	panel_size = 100% 32
+	panel_margin = 0 0
+	panel_padding = 0 0 0
+	panel_background_id = 1
+	wm_menu = 0
+	panel_dock = 0
+	panel_position = bottom center horizontal
+	panel_layer = normal
+	panel_monitor = all
+	autohide = 0
+	autohide_show_timeout = 0
+	autohide_hide_timeout = 0
+	autohide_height = 1
+	strut_policy = follow_size
+	panel_window_name = tint2
+	disable_transparency = 0
+	mouse_effects = 0
+	font_shadow = 0
+	mouse_hover_icon_asb = 100 0 10
+	mouse_pressed_icon_asb = 100 0 0
+
+	# taskbar
+	taskbar_mode = single_desktop
+	taskbar_padding = 4 3 8
+	taskbar_background_id = 1
+	taskbar_active_background_id = 1
+	taskbar_name = 1
+	taskbar_hide_inactive_tasks = 0
+	taskbar_hide_different_monitor = 0
+	taskbar_always_show_all_desktop_tasks = 0
+	taskbar_name_padding = 8 4
+	taskbar_name_background_id = 4
+	taskbar_name_active_background_id = 4
+	taskbar_name_font = Noto Sans 8
+	taskbar_name_font_color = ${FOREGROUND} 100
+	taskbar_name_active_font_color = ${FOREGROUND} 100
+	taskbar_distribute_size = 0
+	taskbar_sort_order = none
+	task_align = left
+
+	# task
+	task_text = 1
+	task_icon = 0
+	task_centered = 1
+	urgent_nb_of_blink = 0
+	task_maximum_size = 220 0
+	task_padding = 24 2 4
+	task_font = Noto Sans 8
+	task_tooltip = 0
+	task_font_color = ${FOREGROUND} 100
+	task_active_font_color = ${FOREGROUND} 100
+	task_urgent_font_color = ${BLACK} 100
+	task_background_id = 1
+	task_active_background_id = 3
+	task_urgent_background_id = 5
+	mouse_left = toggle_iconify
+	mouse_middle = none
+	mouse_right = close
+
+	# system tray
+	systray_padding = 8 4 4
+	systray_background_id = 1
+	systray_sort = ascending
+	systray_icon_size = 0
+	systray_icon_asb = 100 0 0
+	systray_monitor = 1
+
+	# clock
+	time1_format = %a %-d %B // %H:%M
+	time1_font = Noto Sans 8
+	clock_font_color = ${FOREGROUND} 100
+	clock_padding = 8 0
+	clock_background_id = 2
+
+	# tooltip
+	tooltip_show_timeout = 0
+	tooltip_hide_timeout = 0
+	tooltip_padding = 8 4
+	tooltip_background_id = 1
+	tooltip_font_color = ${FOREGROUND} 100
+	tooltip_font = Noto Sans 8
+	EOF
+}
+
+deploydunst () {
+	read -d '' dunstrc <<- EOF
+	[global]
+	monitor = 0
+	follow = mouse
+	geometry = "275x50-30+30"
+	indicate_hidden = yes
+	shrink = no
+	separator_height = 0
+	padding = 16
+	horizontal_padding = 24
+	frame_width = 2
+	sort = no
+	idle_threshold = 120
+	font = Noto Sans 8
+	line_height = 4
+	markup = full
+	alignment = left
+	show_age_threshold = 60
+	word_wrap = yes
+	ignore_newline = no
+	stack_duplicates = false
+	hide_duplicate_count = yes
+	show_indicators = no
+	icon_position = off
+	sticky_history = yes
+	history_length = 20
+	browser = /usr/bin/firefox -new-tab
+	always_run_script = true
+	title = Dunst
+	class = Dunst
+
+	[shortcuts]
+	close = ctrl+space
+	close_all = ctrl+shift+space
+	history = ctrl+grave
+	context = ctrl+shift+period
+
+	[urgency_low]
+	timeout = 4
+	background = "$BACKGROUND"
+	foreground = "$FOREGROUND"
+	frame_color = "$GREEN"
+
+	[urgency_normal]
+	timeout = 8
+	background = "$BACKGROUND"
+	foreground = "$FOREGROUND"
+	frame_color = "$BLUE"
+
+	[urgency_critical]
+	timeout = 0
+	background = "$BACKGROUND"
+	foreground = "$FOREGROUND"
+	frame_color = "$YELLOW"
+	EOF
+}
+
+escape () {
+	printf "%b" "\033]10;$FOREGROUND\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]11;$BACKGROUND\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]708;$BACKGROUND\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]12;$CURSOR\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;0;$BLACK\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;8;$ALTBLACK\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;1;$RED\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;9;$ALTRED\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;2;$GREEN\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;10;$ALTGREEN\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;3;$YELLOW\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;11;$ALTYELLOW\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;4;$BLUE\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;12;$ALTBLUE\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;13;$ALTMAGENTA\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;5;$MAGENTA\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;6;$CYAN\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;14;$ALTCYAN\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;7;$WHITE\007" > "$term" ; sleep 0.1
+	printf "%b" "\033]4;15;$ALTWHITE\007" > "$term" ; sleep 0.1
+}
+
+sendescape () {
+	for term in /dev/pts/[0-9]*; do
+		escape &
+	done
+}
+
+wallpaperpick () {
+	WALLPAPER=$(shuf -n1 -e ~/.wallpaper/*)
+	SHORTWALLPAPER=$(echo $WALLPAPER | sed "s/.*\///" | sed "s/\..*//")
+	ls ~/.wallpaper | sort -R | tail -$N | while read file; do
+		# Useless animation because aesthetic is really important
+		hsetroot -fill ~/.wallpaper/$file -tint "#3c6f86"
+		sleep 0.1
+	done
+	hsetroot -fill $WALLPAPER -tint "#9ccfe6"
+}
+
+main () {
+	checkup
+	killall -9 tint2 dunst
+	colorpick
+	getcolors
+	cachecolors
+	deploytheme
+	deploytint2
+	deploydunst
+	echo "$paintmyboxcache" > ~/.cache/paintmyboxcache
+	echo "$themerc" > ~/.themes/paintmybox/openbox-3/themerc
+	echo "$tint2rc" > ~/.config/tint2/tint2rc
+	echo "$dunstrc" > ~/.config/dunst/dunstrc
+	dunst -format "<b>%s</b>\n%b" &
+	sendescape &
+	wallpaperpick
+	openbox --reconfigure
+	tint2 &
+}
+
+main
+notify-send "Openbox Loaded" "With $SHORTCOLOR color and $SHORTWALLPAPER wallpaper"
+

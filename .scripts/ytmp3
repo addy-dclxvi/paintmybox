@@ -1,0 +1,9 @@
+#!/bin/bash
+
+## download mp3 from youtube, ssst this is illegal actually
+youtube-dl $1\
+	--add-metadata --metadata-from-title "%(artist)s - %(title)s" \
+	--extract-audio --audio-format mp3 --audio-quality 0 --prefer-ffmpeg \
+	--youtube-skip-dash-manifest --ignore-errors --restrict-filenames \
+	--verbose $f
+notify-send "Youtube" "Check Download"

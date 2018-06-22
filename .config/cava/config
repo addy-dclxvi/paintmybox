@@ -1,0 +1,20 @@
+[general]
+bar_width = 2
+bar_spacing = 1
+
+[input]
+method = fifo
+source = /tmp/mpd.fifo
+
+[output]
+channels = stereo
+
+[color]
+foreground = red
+gradient = 0
+gradient_color_1 = '#000000'
+gradient_color_2 = '#ffffff'
+
+[smoothing]
+integral = 80
+gravity = 40
